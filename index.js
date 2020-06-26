@@ -28,7 +28,7 @@ let state = {
 
 let isAllow = false;
 
-cron.schedule( '10 10 * * 1,3,5', () => {
+cron.schedule( '20 10 * * 1,3,5', () => {
   isAllow = true;
   state = {};
   bot.telegram.sendMessage(
