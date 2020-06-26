@@ -26,10 +26,7 @@ let state = {
   }
 };
 
-let isAllow = false;
-
-cron.schedule( '20 10 * * 1,3,5', () => {
-  isAllow = true;
+cron.schedule( '40 10 * * 1,3,5', () => {
   state = {};
   bot.telegram.sendMessage(
     '-321378259',
@@ -39,21 +36,19 @@ cron.schedule( '20 10 * * 1,3,5', () => {
 
 bot.start( ( ctx ) => ctx.reply( 'Чтобы выбрать время для тренировки напиши /choose. Бот активен только в дни тренировок (Понедельник, Среда, Пятница)' ) );
 
-if ( isAllow ) {
-  bot.command( 'choose', ( { reply } ) => {
-    reply( 'Выберите время, бойцы !!!', Markup
-      .keyboard( [
-        [ '👊 19:30 (+)' ],
-        [ '👊 21:00 (+)' ],
-        [ '👊 19:30 (-)' ],
-        [ '👊 21:00 (-)' ],
-      ] )
-      .oneTime()
-      .resize()
-      .extra()
-    )
-  } );
-}
+bot.command( 'choose', ( { reply } ) => {
+  reply( 'Выберите время, бойцы !!!', Markup
+    .keyboard( [
+      [ '👊 19:30 (+)' ],
+      [ '👊 21:00 (+)' ],
+      [ '👊 19:30 (-)' ],
+      [ '👊 21:00 (-)' ],
+    ] )
+    .oneTime()
+    .resize()
+    .extra()
+  )
+} );
 
 bot.hears( '👊 19:30 (+)', ( ctx ) => {
   state.firstTrainingPeople.count += 1;
