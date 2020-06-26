@@ -1,0 +1,21 @@
+{
+  "name": "cortez",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "12.13.1",
+    "npm": "6.12.1"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-cron": "^2.0.3",
+    "node-telegram-bot-api": "^0.50.0",
+    "telegraf": "^3.38.0"
+  }
+}
