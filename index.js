@@ -5,6 +5,7 @@ const Markup = require( 'telegraf/markup' );
 const app = require( './app' );
 
 const port = process.env.PORT || 3000;
+const groupId = '-321378259';
 
 const bot = new Telegraf( process.env.BOT_TOKEN );
 
@@ -28,10 +29,10 @@ let state = {
 
 bot.start( ( ctx ) => {
   ctx.reply(
-    `Привет ${ctx.from.first_name} \n` +
+    `Привет ${ctx.from.first_name}! \n` +
     'Для выбора времени пиши /choose. \n' +
-    'Бот активен только в дни тренировок \n' +
-    '(Понедельник, Среда, Пятница)'
+    'Бот активен только в дни тренировок. \n' +
+    '(Понедельник, Среда, Пятница).'
   )
 } );
 
@@ -40,20 +41,14 @@ bot.command( 'send', () => {
   clearState();
 
   bot.telegram.sendMessage(
-    '-321378259',
+    groupId,
     '🔴Внимание🔴\n' +
     '\n' +
     '📝 Предварительная запись\n' +
     '(До 16:00)\n' +
     '(Новые правила)\n' +
     '\n' +
-    'Ищем бота @cortezmma_bot и следуем его инструкциям\n' +
-    '🔹19:30\n' +
-    '🔹21:00\n' +
-    '\n' +
-    'Усреднённое время - 20:00 \n' +
-    '(в скобочках ставим + или -)\n' +
-    'Где плюс означает, что вам удобно усреднённое время, а минус - неудобно'
+    'Ищем бота @cortezmma_bot и следуем его инструкциям\n'
   );
 } );
 
@@ -95,28 +90,39 @@ bot.command( 'calculate', () => {
     let secondUsers = mapUsers( state, 'secondTrainingPeople' );
 
     bot.telegram.sendMessage(
-      '-321378259',
+      groupId,
       'Сегодня тренировки по расписанию!\n' +
       '\n' +
-      `1️⃣ 19:30-21:00 (Количество бойцов ${state.firstTrainingPeople.count}) \n` +
-      `(${firstUsers}) \n` +
-      `2️⃣ 21:00-22:30 (Количество бойцов ${state.secondTrainingPeople.count}) \n` +
-      `(${secondUsers})`
+      `1️⃣ 19:30-21:00 \n` +
+      `Количество бойцов: ${state.firstTrainingPeople.count} \n` +
+      `${firstUsers} \n` +
+      '\n' +
+      `2️⃣ 21:00-22:30 \n` +
+      `Количество бойцов: ${state.secondTrainingPeople.count} \n` +
+      `${secondUsers}`
     );
 
     clearState();
+
+  } else if ( state.firstTrainingPeople.count + state.secondTrainingPeople.count === 0 ) {
+
+    bot.telegram.sendMessage(
+      groupId,
+      'Нет ни одного бойца :('
+    );
 
   } else {
 
     let collectiveUsers = mapUsers( state, 'collectiveTraining' );
 
     bot.telegram.sendMessage(
-      '-321378259',
+      groupId,
       'Сегодня ОДНА ОБЩАЯ тренировка 👇\n' +
       ' \n' +
       '20:00 - 21:30 \n' +
-      `Количество бойцов ${state.collectiveTraining.count} \n` +
-      `(${collectiveUsers})`
+      '\n' +
+      `Количество бойцов: ${state.collectiveTraining.count} \n` +
+      `${collectiveUsers}`
     );
 
     clearState();
