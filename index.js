@@ -28,7 +28,7 @@ let state = {
   }
 };
 
-cron.schedule( '38 11 * * 1,3,5', () => {
+cron.schedule( '51 11 * * 1,3,5', () => {
   bot.telegram.sendMessage(
     '-321378259',
     '🔴Внимание🔴\n' +
@@ -92,7 +92,7 @@ bot.hears( '👊 21:00 (-)', ( ctx ) => {
   setState( 'secondTrainingPeople', ctx );
 } );
 
-cron.schedule( '39 11 * * 1,3,5', () => {
+cron.schedule( '00 12 * * 1,3,5', () => {
 
   if ( state.firstTrainingPeople.count + state.secondTrainingPeople.count >= 13 ) {
 
