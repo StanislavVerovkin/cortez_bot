@@ -101,12 +101,13 @@ bot.command( 'calculate', () => {
       'Сегодня тренировки по расписанию!\n' +
       '\n' +
       `1️⃣ 19:30-21:00 \n` +
-      `Количество бойцов: ${state.firstTrainingPeople.count} \n` +
-      `${firstUsers} \n` +
+      `<b>Количество бойцов:</b> ${state.firstTrainingPeople.count} \n` +
+      `<b>Бойцы:</b> ${firstUsers} \n` +
       '\n' +
       `2️⃣ 21:00-22:30 \n` +
-      `Количество бойцов: ${state.secondTrainingPeople.count} \n` +
-      `${secondUsers}`
+      `<b>Количество бойцов:</b> ${state.secondTrainingPeople.count} \n` +
+      `<b>Бойцы:</b> ${secondUsers}`,
+      { parse_mode: "HTML" }
     );
 
     clearState();
@@ -128,8 +129,9 @@ bot.command( 'calculate', () => {
       ' \n' +
       '20:00 - 21:30 \n' +
       '\n' +
-      `Количество бойцов: ${state.collectiveTraining.count} \n` +
-      `${collectiveUsers}`
+      `<b>Количество бойцов:</b> ${state.collectiveTraining.count} \n` +
+      `<b>Бойцы:</b> ${collectiveUsers}`,
+      { parse_mode: "HTML" }
     );
 
     clearState();
