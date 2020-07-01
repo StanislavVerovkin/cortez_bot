@@ -1,12 +1,14 @@
+require( 'dotenv' ).config();
+
 const Telegraf = require( 'telegraf' );
 const Markup = require( 'telegraf/markup' );
+const app = require( './app' );
+
 const cron = require( 'node-cron' );
 
-const express = require( 'express' );
-const app = express();
 const port = process.env.PORT || 3000;
 
-const bot = new Telegraf( '1137259099:AAHwplIAUxASWAiTTJZ3n1mJRgBXb1LkKus' );
+const bot = new Telegraf( process.env.BOT_TOKEN );
 
 let state = {
   firstTrainingPeople: {
@@ -26,15 +28,38 @@ let state = {
   }
 };
 
-cron.schedule( '40 10 * * 1,3,5', () => {
-  state = {};
+cron.schedule( '38 11 * * 1,3,5', () => {
   bot.telegram.sendMessage(
     '-321378259',
-    'Ребята записываемся на тренировку через бота @cortezmma_bot'
+    '🔴Внимание🔴\n' +
+    '\n' +
+    '📝 Предварительная запись\n' +
+    '(До 16:00)\n' +
+    '(Новые правила)\n' +
+    '\n' +
+    'Пишем время тренировки на которое вам удобно\n' +
+    '🔹19:30\n' +
+    '🔹21:00\n' +
+    '\n' +
+    'Усреднённое время - 20:00 \n' +
+    '(в скобочках ставим + или -)\n' +
+    'Где плюс означает, что вам удобно усреднённое время, а минус - неудобно\n' +
+    '\n' +
+    'Пример: \n' +
+    '19:30 (+)\n' +
+    '19:30 (-)\n' +
+    '21:00 (+)\n' +
+    '21:00 (-)\n' +
+    '\n' +
+    'Других значений и лишней информации не пишем, если есть что сказать  - пишем в личку'
   );
 } );
 
-bot.start( ( ctx ) => ctx.reply( 'Чтобы выбрать время для тренировки напиши /choose. Бот активен только в дни тренировок (Понедельник, Среда, Пятница)' ) );
+bot.start( ( ctx ) => {
+  ctx.reply( '' +
+    'Чтобы выбрать время для тренировки напиши /choose. \n' +
+    'Бот активен только в дни тренировок (Понедельник, Среда, Пятница)' )
+} );
 
 bot.command( 'choose', ( { reply } ) => {
   reply( 'Выберите время, бойцы !!!', Markup
@@ -43,6 +68,7 @@ bot.command( 'choose', ( { reply } ) => {
       [ '👊 21:00 (+)' ],
       [ '👊 19:30 (-)' ],
       [ '👊 21:00 (-)' ],
+      [ '👊 -' ],
     ] )
     .oneTime()
     .resize()
@@ -51,78 +77,88 @@ bot.command( 'choose', ( { reply } ) => {
 } );
 
 bot.hears( '👊 19:30 (+)', ( ctx ) => {
-  state.firstTrainingPeople.count += 1;
-  state.firstTrainingPeople.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } );
-  state.collectiveTraining.count += 1;
-  state.collectiveTraining.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } )
+  setState( 'firstTrainingPeople', ctx );
 } );
 
 bot.hears( '👊 21:00 (+)', ( ctx ) => {
-  state.secondTrainingPeople.count += 1;
-  state.secondTrainingPeople.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } );
-  state.collectiveTraining.count += 1;
-  state.collectiveTraining.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } )
+  setState( 'secondTrainingPeople', ctx );
 } );
 
 bot.hears( '👊 19:30 (-)', ( ctx ) => {
-  state.firstTrainingPeople.count += 1;
-  state.firstTrainingPeople.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } );
+  setState( 'firstTrainingPeople', ctx );
 } );
 
 bot.hears( '👊 21:00 (-)', ( ctx ) => {
-  state.secondTrainingPeople.count += 1;
-  state.secondTrainingPeople.people.push( {
-    firstName: ctx.update.message.from.first_name,
-    lastName: ctx.update.message.from.last_name,
-  } );
+  setState( 'secondTrainingPeople', ctx );
 } );
 
-cron.schedule( '0 16 * * 1,3,5', () => {
+cron.schedule( '39 11 * * 1,3,5', () => {
 
   if ( state.firstTrainingPeople.count + state.secondTrainingPeople.count >= 13 ) {
 
-    let firstUsers = state.firstTrainingPeople.people.map( ( i ) => {
-      return i.firstName;
-    } );
-
-    let secondUsers = state.secondTrainingPeople.people.map( ( i ) => {
-      return i.firstName;
-    } );
+    let firstUsers = mapUsers( state, 'firstTrainingPeople' );
+    let secondUsers = mapUsers( state, 'secondTrainingPeople' );
 
     bot.telegram.sendMessage(
       '-321378259',
-      `Первая группа 19:30 (${state.firstTrainingPeople.count}) (${firstUsers}).Вторая группа 21:00 (${state.secondTrainingPeople.count}) (${secondUsers})`,
-      { parse_mode: "HTML" }
-    )
+      'Сегодня тренировки по расписанию!\n' +
+      '\n' +
+      `1️⃣ 19:30-21:00 (${state.firstTrainingPeople.count}) (${firstUsers}) \n` +
+      `2️⃣ 21:00-22:30 (${state.secondTrainingPeople.count}) (${secondUsers})`
+    );
+
+    clearState();
+
   } else {
 
-    let collectiveUsers = state.collectiveTraining.people.map( ( i ) => {
-      return i.firstName;
-    } );
+    let collectiveUsers = mapUsers( state, 'collectiveTraining' );
 
     bot.telegram.sendMessage(
       '-321378259',
-      `Сегодня общая тренировка на 20:00.Количество людей ${state.collectiveTraining.count} (${collectiveUsers})`
-    )
+      'Сегодня ОДНА ОБЩАЯ тренировка 👇\n' +
+      ' \n' +
+      '20:00 - 21:30 \n' +
+      `Количество людей ${state.collectiveTraining.count} (${collectiveUsers})`
+    );
+
+    clearState();
+
   }
 
 } );
 
 bot.launch();
+
+function setState ( choiceTraining, ctx ) {
+
+  state[ choiceTraining ].count += 1;
+  state[ choiceTraining ].people.push( {
+    firstName: ctx.update.message.from.first_name,
+    lastName: ctx.update.message.from.last_name,
+  } );
+
+  if ( ctx.match === '👊 19:30 (+)' || ctx.match === '👊 21:00 (+)' ) {
+    state.collectiveTraining.count += 1;
+    state.collectiveTraining.people.push( {
+      firstName: ctx.update.message.from.first_name,
+      lastName: ctx.update.message.from.last_name,
+    } )
+  }
+}
+
+function clearState () {
+  state.firstTrainingPeople.count = 0;
+  state.collectiveTraining.count = 0;
+  state.secondTrainingPeople.count = 0;
+  state.firstTrainingPeople.people = [];
+  state.secondTrainingPeople.people = [];
+  state.collectiveTraining.people = [];
+}
+
+function mapUsers ( state, userType ) {
+  return state[ userType ].people.map( ( i ) => {
+    return i.firstName;
+  } )
+}
 
 app.listen( port, () => console.log( `Server on port ${port}` ) );
