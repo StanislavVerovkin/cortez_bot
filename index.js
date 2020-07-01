@@ -4,8 +4,6 @@ const Telegraf = require( 'telegraf' );
 const Markup = require( 'telegraf/markup' );
 const app = require( './app' );
 
-const cron = require( 'node-cron' );
-
 const port = process.env.PORT || 3000;
 
 const bot = new Telegraf( process.env.BOT_TOKEN );
@@ -28,7 +26,13 @@ let state = {
   }
 };
 
-cron.schedule( '05 12 * * 1,3,5', () => {
+bot.start( ( ctx ) => {
+  ctx.reply( '' +
+    'Чтобы выбрать время для тренировки напиши /choose. \n' +
+    'Бот активен только в дни тренировок (Понедельник, Среда, Пятница)' )
+} );
+
+bot.command( 'send', () => {
   bot.telegram.sendMessage(
     '-321378259',
     '🔴Внимание🔴\n' +
@@ -53,12 +57,6 @@ cron.schedule( '05 12 * * 1,3,5', () => {
     '\n' +
     'Других значений и лишней информации не пишем, если есть что сказать  - пишем в личку'
   );
-} );
-
-bot.start( ( ctx ) => {
-  ctx.reply( '' +
-    'Чтобы выбрать время для тренировки напиши /choose. \n' +
-    'Бот активен только в дни тренировок (Понедельник, Среда, Пятница)' )
 } );
 
 bot.command( 'choose', ( { reply } ) => {
@@ -92,8 +90,7 @@ bot.hears( '👊 21:00 (-)', ( ctx ) => {
   setState( 'secondTrainingPeople', ctx );
 } );
 
-cron.schedule( '10 12 * * 1,3,5', () => {
-
+bot.command( 'calculate', () => {
   if ( state.firstTrainingPeople.count + state.secondTrainingPeople.count >= 13 ) {
 
     let firstUsers = mapUsers( state, 'firstTrainingPeople' );
@@ -124,7 +121,6 @@ cron.schedule( '10 12 * * 1,3,5', () => {
     clearState();
 
   }
-
 } );
 
 bot.launch();
